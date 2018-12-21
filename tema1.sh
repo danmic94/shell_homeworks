@@ -3,6 +3,7 @@ shopt -s globstar
 FOLDER=$1;
 MIN_SIZE=$2;
 OUTPUT_FILE=$3;
+TOTAL_SIZE=0;
 
 # Validate to see if the first parameter is a directory
 
@@ -25,10 +26,13 @@ do
     if [ -f "$i" ];
     then
       if [ -z ${MIN_SIZE+x} ];then
+        TEMP_FILE_SIZE="$(du -b "$i" | awk '{print $1}')"
+        let TOTAL_SIZE+=TEMP_FILE_SIZE;
         echo "${i##*/}:$TEMP_FILE_SIZE" >> $OUTPUT_FILE
       else
         TEMP_FILE_SIZE="$(du -b "$i" | awk '{print $1}')"
         if [[ $TEMP_FILE_SIZE -gt $MIN_SIZE ]]; then
+          let TOTAL_SIZE+=TEMP_FILE_SIZE;
           echo "${i##*/}:$TEMP_FILE_SIZE" >> $OUTPUT_FILE
         else
           printf "%s:%d is under the size limit\n" "${i##*/}" "${TEMP_FILE_SIZE}"
@@ -36,3 +40,5 @@ do
       fi
     fi
 done
+
+  printf "The total size of the itterated files is: %d" "${TOTAL_SIZE}"
