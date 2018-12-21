@@ -21,6 +21,22 @@ else
   printf "Minimum file size has been set to %d!\n" "${MIN_SIZE}"
 fi
 
+
+if [[ ! -z $OUTPUT_FILE ]]; then
+  if [ -e $OUTPUT_FILE ]
+  then
+      printf "Emptied the contests of the file %s \n" "${OUTPUT_FILE}"
+      echo > $OUTPUT_FILE
+  else
+      printf "Creating new file called : %s \n" "${OUTPUT_FILE}"
+  fi
+else
+  printf "\n"
+  printf "OUTPUT WILL NOT BE WRITTEN SINCE NO FILE IS PROVIDED!\n"
+  printf "\n"
+fi
+
+# I must confess that the recursive iteration I found on stack overflow :(
 for i in $FOLDER/**/*
 do
     if [ -f "$i" ];
@@ -28,12 +44,16 @@ do
       if [ -z ${MIN_SIZE+x} ];then
         TEMP_FILE_SIZE="$(du -b "$i" | awk '{print $1}')"
         let TOTAL_SIZE+=TEMP_FILE_SIZE;
-        echo "${i##*/}:$TEMP_FILE_SIZE" >> $OUTPUT_FILE
+        if [[ ! -z $OUTPUT_FILE ]]; then
+          echo "${i##*/}:$TEMP_FILE_SIZE" >> $OUTPUT_FILE
+        fi
       else
         TEMP_FILE_SIZE="$(du -b "$i" | awk '{print $1}')"
         if [[ $TEMP_FILE_SIZE -gt $MIN_SIZE ]]; then
           let TOTAL_SIZE+=TEMP_FILE_SIZE;
-          echo "${i##*/}:$TEMP_FILE_SIZE" >> $OUTPUT_FILE
+          if [[ ! -z $OUTPUT_FILE ]]; then
+            echo "${i##*/}:$TEMP_FILE_SIZE" >> $OUTPUT_FILE
+          fi
         else
           printf "%s:%d is under the size limit\n" "${i##*/}" "${TEMP_FILE_SIZE}"
         fi
@@ -41,4 +61,5 @@ do
     fi
 done
 
-  printf "The total size of the itterated files is: %d" "${TOTAL_SIZE}"
+  printf "\n \t The total size of the itterated files is: %d \n\n" "${TOTAL_SIZE}"
+  exit 0
